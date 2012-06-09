@@ -2,10 +2,16 @@ package de.reneruck.silenttimes;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
@@ -17,6 +23,7 @@ public class HelloAndroidActivity extends Activity {
 
     private static String TAG = "silenttimes";
 	private AudioManager audioManager;
+	private AlarmHandler alarmHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -25,25 +32,38 @@ public class HelloAndroidActivity extends Activity {
         setContentView(R.layout.main);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         
-        
         this.audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-        int mode = this.audioManager.getRingerMode();
+        this.alarmHandler = new AlarmHandler();
         
         Switch switcher = (Switch) findViewById(R.id.mode_switch);
-        switch (mode) {
-			case AudioManager.RINGER_MODE_NORMAL:
-				switcher.setChecked(false);
-				break;
-			case AudioManager.RINGER_MODE_VIBRATE:
-			default:
-				switcher.setChecked(true);
-				break;
-		}
         switcher.setOnCheckedChangeListener(modeSwitchListener);
         checkState(switcher);
         updateBars();
     }
+    
+	/* Creates the menu items */
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	Log.d(TAG, "------------- onCreateMenue --------------");
+    	MenuInflater inflater = getMenuInflater();
+    	inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+	/* 
+     * Menü Items
+     */
+    public boolean onOptionsItemSelected(MenuItem item) {
+        
+    	switch(item.getItemId()){
+	        case  R.id.menu_configure:
+	        	Intent i = new Intent(this, Configuration.class);
+	        	startActivity(i);
+	        	break;
+	        default:
+	            return super.onOptionsItemSelected(item);
+    	}
+		return true;
+     }
     
     private void checkState(Switch switcher) {
     	if(AudioManager.RINGER_MODE_VIBRATE == this.audioManager.getRingerMode()
@@ -71,36 +91,36 @@ public class HelloAndroidActivity extends Activity {
 
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			changeMode((Switch) buttonView, isChecked);
+			alarmHandler.changeMode((Switch) buttonView, isChecked, audioManager);
+			updateBars();
 		}
 	};
 	
-	private void changeMode(Switch switcher, boolean checked) {
-		if(checked){
-			setNightMode(this.audioManager);
-		} else {
-			setDayMode(this.audioManager);
-		}
-		updateBars();
-	}
-    
-    private void setNightMode(AudioManager audioManager) {
-    	
-    	audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, AudioManager.FLAG_VIBRATE);
-    	audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 0, AudioManager.FLAG_VIBRATE);
-    	audioManager.setStreamVolume(AudioManager.STREAM_RING, 0, AudioManager.FLAG_VIBRATE);
-    	audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, 0, AudioManager.FLAG_VIBRATE);
-    	audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-    }
-    
-    private void setDayMode(AudioManager audioManager) {
-    	
-    	audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION) -1, AudioManager.FLAG_VIBRATE);
-    	audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL) -1, AudioManager.FLAG_VIBRATE);
-    	audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING) -1, AudioManager.FLAG_VIBRATE);
-    	audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM) -1, AudioManager.FLAG_VIBRATE);
-    	audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-    }
 
+    private OnClickListener mStartRepeatingListener = new OnClickListener() {
+        public void onClick(View v) {
+            // When the alarm goes off, we want to broadcast an Intent to our
+            // BroadcastReceiver.  Here we make an Intent with an explicit class
+            // name to have our own receiver (which has been published in
+            // AndroidManifest.xml) instantiated and called, and then create an
+            // IntentSender to have the intent executed as a broadcast.
+            // Note that unlike above, this IntentSender is configured to
+            // allow itself to be sent multiple times.
+            Intent intent = new Intent(HelloAndroidActivity.this, AlarmHandler.class);
+            PendingIntent sender = PendingIntent.getBroadcast(HelloAndroidActivity.this,
+                    0, intent, 0);
+
+            // We want the alarm to go off 30 seconds from now.
+            long firstTime = SystemClock.elapsedRealtime();
+            firstTime += 15*1000;
+
+            // Schedule the alarm!
+            AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+            am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            firstTime, 15*1000, sender);
+
+            // Tell the user about what we did.
+            }
+    };
 }
 

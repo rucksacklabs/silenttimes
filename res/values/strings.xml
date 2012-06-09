@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello silenttimes!</string>
     <string name="app_name">silenttimes</string>
+    <string name="Configure">Configure</string>
 </resources>
