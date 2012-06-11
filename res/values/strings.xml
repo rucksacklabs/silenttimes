@@ -3,4 +3,9 @@
     <string name="hello">Hello silenttimes!</string>
     <string name="app_name">silenttimes</string>
     <string name="Configure">Configure</string>
+    <string name="deactivate">Deactivate</string>
+    <string name="set">Set</string>
+    <string name="activate">Activate</string>
+    <string name="cancel">cancel</string>
+    <string name="ok">Ok</string>
 </resources>
