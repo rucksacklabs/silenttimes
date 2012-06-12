@@ -8,9 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.text.format.DateFormat;
+import android.util.Log;
 
 public class AlarmHelper {
 
+	private static final String TAG = "Alarm Helper";
 	private Context context;
 	private SharedPreferences storedTimes;
 	
@@ -118,21 +121,22 @@ public class AlarmHelper {
 	}
 	
 	private void setAlarm(long activate, long deactivate) {
-		
-		clearOldAlarms();
+//		clearOldAlarms();
 		
 		PendingIntent sender = getPendingIntent(); 
+		
         // Schedule the alarm!
 		AlarmManager am = (AlarmManager)this.context.getSystemService(Context.ALARM_SERVICE);
-        long abs = Math.abs(activate - deactivate);
-		am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        activate, abs, sender);
+        am.setRepeating(AlarmManager.RTC_WAKEUP,
+                        activate, Math.abs(activate - deactivate), sender);
+        
+        CharSequence format = DateFormat.format("dd.MM. hh:mm", activate);
+        
+        Log.d(TAG, "Setting new Alarm, next start at " + format + "h repeating every " + (Math.abs(activate - deactivate) / 10000) + "min");
 	}
 	
 	private PendingIntent getPendingIntent() {
 		 Intent intent = new Intent(this.context, AlarmHandler.class);
 		 return PendingIntent.getBroadcast(this.context, 0, intent, 0);
 	}
-	
-	 
 }
