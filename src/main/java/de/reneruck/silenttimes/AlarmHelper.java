@@ -80,13 +80,28 @@ public class AlarmHelper {
 			break;
 		}
 		
+		long activateTimestamp = calcTimestamp(activate_hour, activate_min);
+		long deactivateTimestamp = calcTimestamp(deactivate_hour, deactivate_min);
+		setAlarm(activateTimestamp, deactivateTimestamp);
+	}
+
+	private long calcTimestamp(int hour, int min) {
 		Calendar nowCal = Calendar.getInstance();
+		long currentTimeMillis = System.currentTimeMillis();
+		nowCal.setTimeInMillis(currentTimeMillis);
 		
-		int hourDiff = Math.abs(activate_hour - Calendar.HOUR_OF_DAY);
-		int minuteDiff = Math.abs(activate_min - Calendar.MINUTE);
+		int hourDiff = hour - nowCal.get(Calendar.HOUR_OF_DAY);
 		
-		long hourDiffInMs = (hourDiff / 60) * 60000;
-		long minuteDiffInMs = (minuteDiff / 60) * 60000;
+		if(hourDiff <= 0) {
+			hourDiff = 24 + hourDiff; 
+		}
+		
+		int minuteDiff = min - nowCal.get(Calendar.MINUTE);
+		
+		long hourDiffInMs = (hourDiff * 60) * 60000;
+		long minuteDiffInMs = minuteDiff * 60000;
+		
+		return currentTimeMillis + hourDiffInMs + minuteDiffInMs;
 	}
 
 	private void store(String key, String value){
@@ -109,8 +124,9 @@ public class AlarmHelper {
 		PendingIntent sender = getPendingIntent(); 
         // Schedule the alarm!
 		AlarmManager am = (AlarmManager)this.context.getSystemService(Context.ALARM_SERVICE);
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        activate, Math.abs(activate - deactivate), sender);
+        long abs = Math.abs(activate - deactivate);
+		am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        activate, abs, sender);
 	}
 	
 	private PendingIntent getPendingIntent() {
