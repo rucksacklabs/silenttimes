@@ -19,7 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-public class HelloAndroidActivity extends Activity {
+public class MainActivity extends Activity {
 
     public static final String DEACTIVATE_TIME = "activate";
 	public static final String ACTIVATE_TIME = "deactivate";

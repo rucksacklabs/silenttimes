@@ -19,20 +19,20 @@ public class AlarmHelper {
 	
 	public AlarmHelper(Context context) {
 		this.context = context;
-		this.storedTimes = this.context.getSharedPreferences(HelloAndroidActivity.STORED_TIMES, Context.MODE_PRIVATE);
+		this.storedTimes = this.context.getSharedPreferences(MainActivity.STORED_TIMES, Context.MODE_PRIVATE);
 	}
 	
 	public int[] getStoredTime(TimerType timerType) {
 		switch (timerType) {
 			case activation:
-				String activate = this.storedTimes.getString(HelloAndroidActivity.ACTIVATE_TIME, "");
+				String activate = this.storedTimes.getString(MainActivity.ACTIVATE_TIME, "");
 				if(!activate.isEmpty()){
 					return new int[]{Integer.parseInt(activate.split(":")[0]) , Integer.parseInt(activate.split(":")[1]) }; 
 				}
 				
 				break;
 			case deactivation:
-				String deactivate = storedTimes.getString(HelloAndroidActivity.DEACTIVATE_TIME, "");
+				String deactivate = storedTimes.getString(MainActivity.DEACTIVATE_TIME, "");
 				if(!deactivate.isEmpty()){
 					return new int[]{Integer.parseInt(deactivate.split(":")[0]) , Integer.parseInt(deactivate.split(":")[1]) }; 
 				}
@@ -62,7 +62,7 @@ public class AlarmHelper {
 				deactivate_hour = storedTime[0]; 
 				deactivate_min = storedTime[1];				
 			}
-			store(HelloAndroidActivity.ACTIVATE_TIME, activate_hour + ":" + activate_min);
+			store(MainActivity.ACTIVATE_TIME, activate_hour + ":" + activate_min);
 			break;
 
 		case deactivation:
@@ -76,7 +76,7 @@ public class AlarmHelper {
 				activate_hour = storedTime2[0];
 				activate_min = storedTime2[1];
 			}
-			store(HelloAndroidActivity.DEACTIVATE_TIME, deactivate_hour + ":" + deactivate_min);
+			store(MainActivity.DEACTIVATE_TIME, deactivate_hour + ":" + deactivate_min);
 			break;
 
 		default:
@@ -108,7 +108,7 @@ public class AlarmHelper {
 	}
 
 	private void store(String key, String value){
-		SharedPreferences sharedPreferences = this.context.getSharedPreferences(HelloAndroidActivity.STORED_TIMES, Context.MODE_PRIVATE);
+		SharedPreferences sharedPreferences = this.context.getSharedPreferences(MainActivity.STORED_TIMES, Context.MODE_PRIVATE);
 		Editor edit = sharedPreferences.edit();
 		edit.putString(key, value);
 		edit.commit();
