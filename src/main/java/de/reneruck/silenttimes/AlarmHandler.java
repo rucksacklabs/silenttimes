@@ -1,19 +1,16 @@
 package de.reneruck.silenttimes;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
-import android.widget.Switch;
+import android.util.Log;
 
-public class AlarmHandler {
+public class AlarmHandler extends BroadcastReceiver{
 
-	public void changeMode(Switch switcher, boolean checked, AudioManager audioManager) {
-		if(checked){
-			setNightMode(audioManager);
-		} else {
-			setDayMode(audioManager);
-		}
-	}
-    
-    private void setNightMode(AudioManager audioManager) {
+	private static final String TAG = null;
+
+    public void setNightMode(AudioManager audioManager) {
     	
     	audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, AudioManager.FLAG_VIBRATE);
     	audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, 0, AudioManager.FLAG_VIBRATE);
@@ -22,7 +19,7 @@ public class AlarmHandler {
     	audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
     }
     
-    private void setDayMode(AudioManager audioManager) {
+    public void setDayMode(AudioManager audioManager) {
     	
     	audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION) -1, AudioManager.FLAG_VIBRATE);
     	audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL) -1, AudioManager.FLAG_VIBRATE);
@@ -30,5 +27,19 @@ public class AlarmHandler {
     	audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM) -1, AudioManager.FLAG_VIBRATE);
     	audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
     }
-    
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		Log.d(TAG, "Received intent");
+		AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+		if(AudioManager.RINGER_MODE_VIBRATE == am.getRingerMode()
+				|| AudioManager.RINGER_MODE_SILENT == am.getRingerMode()) {
+			Log.d(TAG, "Setting to day mode");
+			setDayMode(am);
+		} else {
+			Log.d(TAG, "Setting to night mode");
+			setNightMode(am);
+		}
+		
+	}
 }

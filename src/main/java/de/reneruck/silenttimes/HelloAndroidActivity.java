@@ -25,6 +25,7 @@ public class HelloAndroidActivity extends Activity {
 	public static final String ACTIVATE_TIME = "deactivate";
 	public static final String STORED_TIMES = "stored-times";
 	public static final String STORED_INTENT = "stored-intent";
+	public static final String TIMER_TYPE = "timer-type";
 	
 	private static String TAG = "silenttimes";
 	private AudioManager audioManager;
@@ -113,8 +114,12 @@ public class HelloAndroidActivity extends Activity {
 
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			alarmHandler.changeMode((Switch) buttonView, isChecked, audioManager);
-			updateBars();
+				if(isChecked){
+					alarmHandler.setNightMode(audioManager);
+				} else {
+					alarmHandler.setDayMode(audioManager);
+				}
+				updateBars();
 		}
 	};
 	
